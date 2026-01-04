@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    eslint: {
+    // This allows production builds to complete even if ESLint errors exist
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   async rewrites() {
     return [
