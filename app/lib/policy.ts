@@ -1,7 +1,7 @@
 // Policy engine for transaction validation
 
-const DAILY_LIMIT_SOL = 1.0; // Max 1 SOL per day
-const MAX_PER_TXN_SOL = 0.5; // Max 0.5 SOL per transaction
+const DAILY_LIMIT_SOL = 100.0; // Higher daily cap for testing
+const MAX_PER_TXN_SOL = 20.0; // Allow up to 20 SOL per transaction on test environments
 
 export interface PolicyResult {
   allowed: boolean;
@@ -40,4 +40,3 @@ export function isValidSolanaAddress(address: string): boolean {
     return false;
   }
 }
-

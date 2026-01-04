@@ -5,6 +5,7 @@ import {
     SystemProgram,
     LAMPORTS_PER_SOL
 } from '@solana/web3.js';
+import { getConnection } from "../lib/solana";
 
 /**
  * TransactionBuilder: Handles Solana transaction logistics.
@@ -13,7 +14,7 @@ export class TransactionBuilder {
     private connection: Connection;
 
     constructor() {
-        this.connection = new Connection("https://api.devnet.solana.com", "confirmed");
+        this.connection = getConnection();
     }
 
     async buildTransfer(fromPubkey: PublicKey, toPubkey: string, amount: number): Promise<Transaction> {
@@ -25,8 +26,8 @@ export class TransactionBuilder {
             })
         );
 
-        const { blockhash } = await this.connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
+        const latestBlockhash = await this.connection.getLatestBlockhash();
+        transaction.recentBlockhash = latestBlockhash.blockhash;
         transaction.feePayer = fromPubkey;
 
         return transaction;

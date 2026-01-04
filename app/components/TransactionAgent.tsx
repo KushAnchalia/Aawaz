@@ -2,7 +2,7 @@
 import { useState, useRef, ReactNode, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, Transaction } from "@solana/web3.js";
-import { getConnection, buildTransferTransaction } from "../lib/solana";
+import { getConnection, buildTransferTransaction, SOLANA_RPC_URL } from "../lib/solana";
 import { validateTransfer } from "../lib/policy";
 import { parseWithRegex, ParsedIntent } from "../lib/ai";
 
@@ -13,7 +13,7 @@ interface TransactionAgentProps {
 }
 
 export default function TransactionAgent({ onSpeak, onStopSpeech, initialCommand }: TransactionAgentProps) {
-  const { publicKey, signTransaction, connected } = useWallet();
+  const { publicKey, signTransaction, sendTransaction, connected } = useWallet();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [textInput, setTextInput] = useState("");
@@ -427,7 +427,7 @@ export default function TransactionAgent({ onSpeak, onStopSpeech, initialCommand
   };
 
   const executeTransfer = async (amount: number, to: string) => {
-    if (!publicKey || !signTransaction) {
+    if (!publicKey) {
       setStatus("⚠️ Wallet not connected");
       return;
     }
@@ -456,36 +456,39 @@ export default function TransactionAgent({ onSpeak, onStopSpeech, initialCommand
         amount
       );
 
+      console.log("Phantom wallet", publicKey.toBase58(), "Recipient", to, "RPC", SOLANA_RPC_URL);
+
       // Get recent blockhash
-      const { blockhash } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
+      const latestBlockhash = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = latestBlockhash.blockhash;
       transaction.feePayer = publicKey;
 
       setStatus("✍️ Please sign in your wallet...");
 
-      // Sign transaction
-      const signedTx = await signTransaction(transaction);
-
       setStatus("📤 Sending transaction...");
 
-      // Send transaction with better error handling
+      // Prefer wallet adapter's sendTransaction; fallback to sign+sendRaw
       let signature: string;
       try {
-        signature = await connection.sendRawTransaction(
-          signedTx.serialize(),
-          {
-            skipPreflight: false,
-            maxRetries: 3,
-          }
-        );
+        console.log("Phantom wallet", publicKey.toBase58());
+        console.log("Txn signer target", publicKey.toBase58());
+        console.log("Txn to", to, "amount", amount, "cluster", SOLANA_RPC_URL);
+        if (sendTransaction) {
+          signature = await sendTransaction(transaction, connection, { skipPreflight: false, maxRetries: 3 });
+        } else if (signTransaction) {
+          const signedTx = await signTransaction(transaction);
+          signature = await connection.sendRawTransaction(signedTx.serialize(), { skipPreflight: false, maxRetries: 3 });
+        } else {
+          throw new Error("Wallet does not support sending or signing transactions");
+        }
+        console.log("Txn signature", signature);
       } catch (sendError: any) {
-        // Handle SendTransactionError
         if (sendError.logs) {
           console.error("Transaction logs:", sendError.logs);
           setStatus(`❌ Transaction failed. Logs: ${sendError.logs.join(", ")}`);
         } else if (sendError.message) {
           if (sendError.message.includes("no record of a prior credit")) {
-            setStatus(`❌ Insufficient balance! Your wallet has no SOL on testnet.`);
+            setStatus(`❌ Insufficient balance! Your wallet has no SOL on selected network.`);
           } else {
             setStatus(`❌ Transaction failed: ${sendError.message}`);
           }
@@ -496,10 +499,20 @@ export default function TransactionAgent({ onSpeak, onStopSpeech, initialCommand
       }
 
       // Confirm transaction
-      await connection.confirmTransaction(signature, "confirmed");
+      await connection.confirmTransaction(
+        {
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        },
+        "confirmed"
+      );
 
       // Show full transaction ID with explorer link
-      const explorerUrl = `https://explorer.solana.com/tx/${signature}?cluster=testnet`;
+      const clusterParam = SOLANA_RPC_URL.includes("devnet")
+        ? "devnet"
+        : (SOLANA_RPC_URL.includes("testnet") ? "testnet" : "mainnet");
+      const explorerUrl = `https://explorer.solana.com/tx/${signature}?cluster=${clusterParam}`;
       setStatus(
         <div style={{ color: "white" }}>
           <span style={{ color: "#10b981", fontWeight: "900" }}>✅ Success!</span> <br />
@@ -747,4 +760,3 @@ export default function TransactionAgent({ onSpeak, onStopSpeech, initialCommand
     </div>
   );
 }
-

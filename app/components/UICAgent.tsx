@@ -122,8 +122,7 @@ export default function UICAgent({ onSpeak, onStopSpeech, onAction }: UICAgentPr
         setTxStatus("Building transaction...");
 
         try {
-            // Recipient: For demo, using a fixed devnet address or "Recent Contact"
-            const recipient = "7Aujq4f469p968T23JBFY8f7G6f469p968T23JBFY8f7"; // Mock recipient
+            const recipient = publicKey.toBase58();
             const tx = await transactionBuilder.buildTransfer(
                 publicKey,
                 recipient,

@@ -5,7 +5,10 @@ export const SOLANA_RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
   "https://api.devnet.solana.com";
 
 export function getConnection(): Connection {
-  return new Connection(SOLANA_RPC_URL, "confirmed");
+  return new Connection(SOLANA_RPC_URL, {
+    commitment: "finalized",
+    confirmTransactionInitialTimeout: 30000, // 30 seconds
+  });
 }
 
 // Helper function to get formatted balance
@@ -35,4 +38,3 @@ export function buildTransferTransaction(
 
   return transaction;
 }
-
