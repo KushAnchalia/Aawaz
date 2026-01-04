@@ -1,10 +1,10 @@
 🔊 Aawaz - Voice-First Web3 Platform
 <div align="center">
 <img width="1512" height="825" alt="image" src="https://github.com/user-attachments/assets/55767ac3-aef2-40e0-9b7e-a5e873b1dfd0" />
-<img width="1512" height="830" alt="image" src="https://github.com/user-attachments/assets/10d6678f-19c0-4811-8ff9-2f8c29a8f8a8" />
-<img width="1512" height="830" alt="image" src="https://github.com/user-attachments/assets/bf96a2f5-193f-4288-8bfa-6f6f12ef9802" />\<img width="1512" height="820" alt="image" src="https://github.com/user-attachments/assets/9763e1d0-7869-4c82-b0e0-e914a1100bb1" />
+<img width="1512" height="830" alt="image" src="https://github.com/user-attachments/assets/bf96a2f5-193f-4288-8bfa-6f6f12ef9802" />
+<img width="1512" height="820" alt="image" src="https://github.com/user-attachments/assets/9763e1d0-7869-4c82-b0e0-e914a1100bb1" />
 <img width="1512" height="821" alt="image" src="https://github.com/user-attachments/assets/2cb3a2f0-5e9f-493b-a0ff-7ff348b8bec3" />
-
+</div>
 Web3, powered by voice.
 Live Demo • Report Bug • Request Feature
 </div>
