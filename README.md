@@ -5,7 +5,7 @@
 
 <br/>
 
-# 🔊 **Aawaz** - Voice-First Web3 Platform
+# 🔊 **Aawaz** - Voice-First Web3 Platform for Solana
 
 <br/>
 
